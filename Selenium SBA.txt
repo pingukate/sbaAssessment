@@ -1,0 +1,533 @@
+DRIVER SETUP
+
+package com.selenium.setup;
+
+import org.openqa.selenium.WebDriver;
+
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+public class DriverSetup {
+
+private WebDriver driver;
+
+public static String baseUrl = "http://webapps.tekstac.com/CustomerRegistration/”;
+
+public WebDriver getDriver() {
+
+driver = new FirefoxDriver();
+
+driver.navigate().to(DriverSetup.baseUrl);
+
+return driver;
+
+}
+
+}
+
+--------------------------------------------
+
+CUSTOMERFORM
+
+package com.selenium.pages;
+
+import org.openqa.selenium.By;
+
+import org.openqa.selenium.WebDriver;
+
+import org.openqa.selenium.firefox.FirefoxDriver;
+
+import com.selenium.setup.DriverSetup;
+
+public class CustomerForm {
+
+// fill the code
+
+WebDriver driver;
+
+public CustomerForm(WebDriver driver)
+
+{
+
+this.driver=driver;
+
+}
+
+public void setCustomerName(String cName)
+
+{
+
+try
+
+{
+
+driver.findElement(By.name("cname")).sendKeys(cName);
+
+}
+
+catch (Exception e)
+
+{
+
+e.printStackTrace();
+
+}
+
+}
+
+public void setAge(String age)
+
+{
+
+driver.findElement(By.name("age")).sendKeys(age);
+
+}
+
+public void setAddress(String address)
+
+{
+
+driver.findElement(By.name("address")).sendKeys(address);;
+
+}
+
+public void setPhoneNumber(String phoneNumber)
+
+{
+
+driver.findElement(By.name("phonenumber")).sendKeys(phoneNumber);;
+
+}
+
+public void setEmail(String email)
+
+{
+
+driver.findElement(By.name("email")).sendKeys(email);;
+
+}
+
+public void submitForm()
+
+{
+
+driver.findElement(By.id("submit")).click();
+
+}
+
+public String getErrorMessage()
+
+{
+
+return driver.findElement(By.id("message")).getText();
+
+}
+
+}
+
+-------------------------------------------------------------------------
+
+DISPLAYCUSTOMER.JAVA
+
+package com.selenium.pages;
+
+import org.openqa.selenium.By;
+
+import org.openqa.selenium.WebDriver;
+
+public class DisplayCustomer {
+
+WebDriver driver;
+
+public DisplayCustomer(WebDriver driver)
+
+{
+
+this.driver=driver;
+
+}
+
+public String getTitle()
+
+{
+
+return driver.findElement(By.tagName("h2")).getText();
+
+}
+
+public String getName()
+
+{
+
+return driver.findElement(By.xpath("//table/tbody/tr[1]/td[2]")).getText();
+
+}
+
+public String getAge()
+
+{
+
+return driver.findElement(By.xpath("//table/tbody/tr[2]/td[2]")).getText();
+
+}
+
+public String getEmail()
+
+{
+
+return driver.findElement(By.xpath("//table/tbody/tr[5]/td[2]")).getText();
+
+}
+
+public String getAddress()
+
+{
+
+return driver.findElement(By.xpath("//table/tbody/tr[3]/td[2]")).getText();
+
+}
+
+public String getPhoneNumber()
+
+{
+
+return driver.findElement(By.xpath("//table/tbody/tr[4]/td[2]")).getText();
+
+}
+
+}
+
+-------------------------------------------------------------------------
+
+TESTCUSTOMERFORM
+
+package com.selenium.tests;
+
+import org.openqa.selenium.WebDriver;
+
+import org.testng.annotations.AfterClass;
+
+import org.testng.annotations.BeforeClass;
+
+import org.testng.annotations.DataProvider;
+
+import org.testng.annotations.Test;
+
+import com.selenium.pages.CustomerForm;
+
+import com.selenium.setup.ExcelUtils;
+
+import com.selenium.setup.DriverSetup;
+
+// fill the code
+
+public class TestCustomerForm extends DriverSetup{
+
+WebDriver driver;
+
+CustomerForm customerForm;
+
+static public String blankErrtxt;
+
+@BeforeClass
+
+public void setUp() {
+
+driver = getDriver();
+
+customerForm= new CustomerForm(driver);
+
+}
+
+@Test(dataProvider="customerInvalid")
+
+public void testInvalidCustomerDetails(String testCaseName,String customerName, String age,String address,String phoneNumber,String email) {
+
+// fill the code
+
+customerForm.setCustomerName(customerName);
+
+customerForm.setAge(age);
+
+customerForm.setAddress(address);
+
+customerForm.setPhoneNumber(phoneNumber);
+
+customerForm.setEmail(email);
+
+customerForm.submitForm();
+
+blankErrtxt=customerForm.getErrorMessage();
+
+}
+
+@DataProvider(name="customerInvalid")
+
+public Object[][] getExcelData() throws Exception {
+
+String sheetName="customer_invalid";
+
+return getExcelData(sheetName);
+
+}
+
+public Object[][] getExcelData(String sheetName) throws Exception
+
+{
+
+return ExcelUtils.readExcelData(sheetName);
+
+}
+
+@AfterClass
+
+public void closeBrowser(){
+
+driver.close();
+
+}
+
+}
+
+---------------------------------------------------------------------
+
+TESTDISPLAYCUSTOMER
+
+package com.selenium.tests;
+
+import org.openqa.selenium.WebDriver;
+
+import org.testng.annotations.AfterClass;
+
+import org.testng.annotations.BeforeClass;
+
+import org.testng.annotations.DataProvider;
+
+import org.testng.annotations.Test;
+
+import com.selenium.pages.CustomerForm;
+
+import com.selenium.pages.DisplayCustomer;
+
+import com.selenium.setup.DriverSetup;
+
+import com.selenium.setup.ExcelUtils;
+
+// fill the code
+
+public class TestDisplayCustomer extends DriverSetup{
+
+WebDriver driver;
+
+DisplayCustomer displayCustomer;
+
+public static String titletxt;
+
+public static String customerNametxt;
+
+public static String agetxt;
+
+public static String addresstxt;
+
+public static String numbertxt;
+
+public static String emailtxt;
+
+@BeforeClass
+
+public void setUp() {
+
+driver = getDriver();
+
+displayCustomer= new DisplayCustomer(driver);
+
+}
+
+@Test(dataProvider="customerValid")
+
+public void testValidCustomerDetails(String testCaseName,String customerName, String age,String address,String phoneNumber,String email) {
+
+CustomerForm customerForm=new CustomerForm(driver);
+
+customerForm.setCustomerName(customerName);
+
+customerForm.setAge(age);
+
+customerForm.setAddress(address);
+
+customerForm.setPhoneNumber(phoneNumber);
+
+customerForm.setEmail(email);
+
+customerForm.submitForm();
+
+titletxt=displayCustomer.getTitle();
+
+customerNametxt=displayCustomer.getName();
+
+agetxt=displayCustomer.getAge();
+
+addresstxt=displayCustomer.getAddress();
+
+numbertxt=displayCustomer.getPhoneNumber();
+
+emailtxt=displayCustomer.getEmail();
+
+}
+
+@DataProvider(name="customerValid")
+
+public Object[][] getExcelData() throws Exception {
+
+String sheetName="customer_valid";
+
+return getExcelData(sheetName);
+
+}
+
+public Object[][] getExcelData(String sheetName) throws Exception
+
+{
+
+return ExcelUtils.readExcelData(sheetName);
+
+}
+
+@AfterClass
+
+public void closeBrowser(){
+
+driver.close();
+
+}
+
+}
+
+-------------------------------------------------------------------------------
+
+EXCELUTILS
+
+package com.selenium.setup;
+
+import java.io.File;
+
+import java.io.FileInputStream;
+
+import org.apache.poi.xssf.usermodel.XSSFCell;
+
+import org.apache.poi.xssf.usermodel.XSSFRow;
+
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class ExcelUtils {
+
+private static XSSFSheet ExcelWSheet;
+
+private static XSSFWorkbook ExcelWBook;
+
+private static FileInputStream excelFile;
+
+private static String filePath;
+
+public static Object[][] readExcelData(String sheetName) throws Exception {
+
+String[][] arrayExcelData = null;
+
+String workingDir = System.getProperty("user.dir");
+
+filePath = workingDir+File.separator+"src"+File.separator+"customer_registration.xlsx";
+
+excelFile = new FileInputStream(filePath);
+
+ExcelWBook = new XSSFWorkbook(excelFile);
+
+ExcelWSheet = ExcelWBook.getSheet(sheetName);
+
+// fill the code
+
+int rowCount = ExcelWSheet.getLastRowNum();
+
+int columnCount = ExcelWSheet.getRow(0).getLastCellNum();
+
+arrayExcelData = new String[rowCount][columnCount];
+
+for(int i=1; i <rowCount+1; i++){
+
+try {
+
+XSSFRow row = ExcelWSheet.getRow(i);
+
+for(int j=0; j <columnCount; j++){
+
+try {
+
+String cellValue = "";
+
+try{
+
+XSSFCell c=row.getCell(j);
+
+cellValue = row.getCell(j).getStringCellValue();
+
+//cellValue = format.formatCellValue(c);
+
+}
+
+catch(NullPointerException e)
+
+{
+
+}
+
+arrayExcelData[i-1][j] = cellValue; // add to the data array
+
+} catch (Exception e) {
+
+e.printStackTrace();
+
+}
+
+}
+
+}
+
+catch (Exception e)
+
+{
+
+e.printStackTrace();
+
+}
+
+}
+
+excelFile.close();
+
+return arrayExcelData;
+
+}}
+
+--------------------------------------------------
+
+TESTNG.XML (UPDATE IN SOURCE)
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">-->
+
+<suite name="Suite">
+
+<test name="Test">
+
+<classes>
+
+<class name="com.selenium.tests.TestDisplayCustomer"/>
+
+<class name="com.selenium.tests.TestCustomerForm"/>
+
+</classes>
+
+</test> <!-- Test -->
+
+</suite> <!-- Suite -->
